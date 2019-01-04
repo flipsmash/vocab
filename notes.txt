@@ -1,0 +1,7 @@
+error when term has no definition Error:  The Following Error occured: list index out of range
+
+Also:
+A Term must be only a single word
+
+Also:
+Primary key violation

@@ -1,0 +1,31 @@
+<!doctype html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<html>
+   <body>
+   <h1>All Currently Undefined Words</h1>
+   <p>{{ num_words }} currently in need of definition</p>
+      <table width="100" id="basictable" >
+         <thead>
+            <td>Term</td>
+            <td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+         </thead>
+         
+         {% for row in rows %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+               <td>{{row["term"]}}</td>
+			   <td><a href="{{ url_for('new_term') }}/{{row["term"]}}">edit</a>
+			   <td><a href="http://www.dictionary.com/browse/{{row["term"]}}" target="_blank">lookup</a></td>
+			   <td><a href="{{ url_for('delete_udef') }}/{{row["term"]}}">delete</a>
+          
+            </tr>
+         {% endfor %}
+      </table>
+      
+      <a href = "/">Go back to home page</a>
+      
+   </body>
+</html>

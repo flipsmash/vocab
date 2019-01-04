@@ -1,0 +1,22 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+   <body>
+      
+      <form action = "{{ url_for('editrec') }}" method = "POST">
+         <h3>Edit a Definition</h3>
+         {{term}} as a {{pos}}
+         <input hidden = "text" name = "term" value="{{term}}"/></br>
+         
+         <input type = "hidden" name = "pos" value="{{pos}}"/><br>
+         Definition<br>
+         <textarea name = "defin" rows = "4" cols="100">{{defin}}</textarea><br>
+         
+         
+      
+         <input type = "submit" value = "submit" /><br>
+      </form>
+      
+   </body>
+</html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<html>
+   <body>
+   
+      Overall Percentage Correct to Date : {{ oall }}
+	  <p>Words wrong at least once:</p>
+	  <table id="basictable">
+         <thead>
+            <td>Term</td>
+            <td>Num Correct</td>
+            <td>Num Total</td>
+            
+         </thead>
+	  {% for row in rows %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+               <td>{{row[0]}}</td>
+               <td>{{row[1]}}</td>
+               <td> {{ row[2]}}</td>	
+            </tr>
+         {% endfor %}
+      </table
+   </body>
+</html>

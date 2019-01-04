@@ -1,0 +1,26 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+   <body>
+      
+      <form action = "{{ url_for('addrec') }}" method = "POST">
+         <h3>Definition</h3>
+         ID#: {{ term[0] }}<br><br>Term: </nbsp>
+         <input type = "text" name = "term" value="{{ term[1] }}" /></br></br>
+         
+         Definition<br>
+         <textarea name = "defin" rows="4" cols="100" >{{ term[3] }}</textarea><br>
+         
+         <br>Past of Speech<br>
+         <select name="pos">
+		  <option value="Adjective"{% if term[2] == "Adjective" %}selected{% endif %}>Adjective</option>
+		  <option value="Adverb"{% if term[2] == "Adverb" %}selected{% endif %}>Adverb</option>
+		  <option value="Noun"{% if term[2] == "Noun" %}selected{% endif %}>Noun</option>
+		  <option value="Verb"{% if term[2] == "Verb" %}selected{% endif %}>Verb</option>
+		 </select><br><br>
+         <input type = "submit" value = "submit" /><br>
+      </form>
+      
+   </body>
+</html>

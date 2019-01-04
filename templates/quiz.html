@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="  url_for('static', filename='style.css')  ">
+	<style>
+	.flex-label {
+	  display: flex;
+	}
+	input[type=radio] {
+	  margin-right: 8px;
+	}
+	</style>
+</head>
+<body>
+	<h1>Quiz</h1>     
+	<form action = "{{ url_for('quiz')  }}" method = "POST">
+	
+	{% for key in quizd %}
+		<hr>{{ key }}
+		<ul>
+		
+		{%for x in range(4)%}
+			<input type="radio" name="{{ key }}" value="{% if quizd[key][x][2] == 0 %}{{ quizd[key][x][1] }}">{% else %}NULL">{% endif %}{{ quizd[key][x][1] }}
+			<br>{% endfor %}
+		</ul>
+	{% endfor %}
+
+	<input type="submit" value="Submit">
+	</form>
+</body>
+</html>

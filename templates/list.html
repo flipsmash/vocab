@@ -1,0 +1,32 @@
+<!doctype html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+<html>
+   <body>
+   <h1><a href = "/defined">All Defined Words</a></h1>
+   <p> <a href = "/defined/a">A</a> | <a href = "/defined/b">B</a> | <a href = "/defined/c">C</a> | <a href = "/defined/d">D</a> | <a href = "/defined/e">E</a> | <a href = "/defined/f">F</a> | <a href = "/defined/g">G</a> | <a href = "/defined/h">H</a> | <a href = "/defined/i">I</a> | <a href = "/defined/j">J</a> | <a href = "/defined/k">K</a> | <a href = "/defined/l">L</a> | <a href = "/defined/m">M</a> | <a href = "/defined/n">N</a> | <a href = "/defined/o">O</a> | <a href = "/defined/p">P</a> | <a href = "/defined/q">Q</a> | <a href = "/defined/r">R</a> | <a href = "/defined/s">S</a> | <a href = "/defined/t">T</a> | <a href = "/defined/u">U</a> | <a href = "/defined/v">V</a> | <a href = "/defined/w">W</a> | <a href = "/defined/x">X</a> | <a href = "/defined/y">Y</a> | <a href = "/defined/z">Z</a></p>
+   <p>{{ num_words }} Terms Defined</p>
+      <table id="basictable">
+         <thead>
+            <td>Term</td>
+            <td>Part of Speech</td>
+            <td>Definition</td>
+            
+         </thead>
+         
+         {% for row in rows %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+               <td>{{row["term"]}}</td>
+               <td>{{row["part_of_speech"]}}</td>
+               <td> {{ row["definition"]}}</td>	
+            </tr>
+         {% endfor %}
+      </table>
+      
+      <a href = "/">Go back to home page</a>
+      
+   </body>
+</html>

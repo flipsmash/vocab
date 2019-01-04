@@ -1,0 +1,29 @@
+* {
+    font-family: Verdana;
+}
+
+.odd { 
+    background-color: #ddd;
+}
+
+#basictable {
+    
+    border-collapse: collapse;
+}
+
+#basictable td, #basictable th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+
+
+#basictable tr:hover {background-color: #bbb;}
+
+#basictable th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
