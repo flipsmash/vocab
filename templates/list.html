@@ -19,7 +19,7 @@
          
          {% for row in rows %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-               <td>{{row["term"]}}</td>
+               <td><a>{{row["term"]}} <a href="/edit/"{{ row["id"]}}>[edit]</a>  |  <a href=""/delete/">[delete]</a></td>
                <td>{{row["part_of_speech"]}}</td>
                <td> {{ row["definition"]}}</td>	
             </tr>

@@ -136,7 +136,7 @@ def deflist(alpha=None):
     con.row_factory = sql.Row
     cur = con.cursor()
 
-    if (alpha == None):
+    if (alpha is None):
         cur.execute("select * from defined order by term")
     else:
         alpha = alpha + "%"
