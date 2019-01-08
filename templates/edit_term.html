@@ -1,22 +1,50 @@
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-</head>
-   <body>
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2>{% block title %}Edit Term {{termid}}{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
+       <form action = "{{ url_for('editrec') }}" method = "POST">
+         Term:
+         <input type = "text" name = "term" value="{{ term }}" /></br></br>
+
+         Definition<br>
+         <textarea name = "defin" rows="4" cols="100" >{{ defin }}</textarea><br>
+
+         <br>Past of Speech<br>
+         <select name="pos">
+		  <option value="Adjective"{% if pos == "Adjective" %}selected{% endif %}>Adjective</option>
+		  <option value="Adverb"{% if pos == "Adverb" %}selected{% endif %}>Adverb</option>
+		  <option value="Noun"{% if pos == "Noun" %}selected{% endif %}>Noun</option>
+		  <option value="Verb"{% if pos == "Verb" %}selected{% endif %}>Verb</option>
+		 </select><br><br>
+          <input type="hidden" name="termid" value="{{ termid }}">
+         <input type = "submit" value = "submit" /><br>
+      </form>
+
+{% endblock %}
+
+
+
+
+
       
       <form action = "{{ url_for('editrec') }}" method = "POST">
-         <h3>Edit a Definition</h3>
-         {{term}} as a {{pos}}
-         <input hidden = "text" name = "term" value="{{term}}"/></br>
-         
-         <input type = "hidden" name = "pos" value="{{pos}}"/><br>
+         <h3>Edit a Definition for Term {{termid}}:</h3>
+         <input type = "text" name = "term" value="{{ term }}" />
+
          Definition<br>
-         <textarea name = "defin" rows = "4" cols="100">{{defin}}</textarea><br>
-         
-         
-      
+         <textarea name = "defin" rows="4" cols="100" >{{ defin }}</textarea>
+
+         Part of Speech<br>
+         <select name="pos">
+		  <option value="Adjective"{% if pos == "Adjective" %}selected{% endif %}>Adjective</option>
+		  <option value="Adverb"{% if pos == "Adverb" %}selected{% endif %}>Adverb</option>
+		  <option value="Noun"{% if pos == "Noun" %}selected{% endif %}>Noun</option>
+		  <option value="Verb"{% if pos == "Verb" %}selected{% endif %}>Verb</option>
+		 </select><br><br>
+          <input type="hidden" name="termid" value="{{ termid }}">
          <input type = "submit" value = "submit" /><br>
       </form>
       
-   </body>
-</html>

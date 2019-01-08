@@ -12,27 +12,38 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/enternew', defaults={'termid': None})
-@app.route('/enternew/<termid>/')
-def new_term(termid):
+@app.route('/enternew')
+def new_term():
+    return render_template('new_term2.html')
 
-    if termid is not None:
-        print(termid, file=sys.stderr)
-        print(type(termid))
-        con = sql.connect("vocab.db")
-        cur = con.cursor()
-        #termid = int(termid)
-        cur.execute("select * from defined where id = ?", termid)
-        row = cur.fetchone()
-        print(row, file=sys.stderr)
-        print(type(row))
-        return render_template('new_term.html', term=row)
-    else:
-        return render_template('new_term.html', term = "NULL")
 
+@app.route('/editterm/<termid>/')
+def edit_term(termid):
+    con = sql.connect("vocab.db")
+    cur = con.cursor()
+    # termid = int(termid)
+    cur.execute("select * from defined where id = ?", (termid,))
+    row = cur.fetchone()
+    #print(row, file=sys.stderr)
+    term = row[1]
+    pos = row[2]
+    defin = row[3]
+    return render_template('edit_term.html', termid=termid, term=term, pos=pos, defin=defin)
+
+@app.route('/editnewterm/<term>/')
+def edit_newterm(term):
+    con = sql.connect("vocab.db")
+    cur = con.cursor()
+    #term = request.args.get("term")
+    cur.execute("select max(id) from defined")
+    row = cur.fetchone()
+    next_id = int(row[0]) + 1
+    cur.execute("insert into defined (id, term)values(?,?)", (next_id, term))
+    con.commit()
+    return render_template('edit_term.html', termid=next_id, term=term)
 
 @app.route('/addrec', methods=['POST', 'GET'])
-#@app.route('/addrec/<termid>/')
+# @app.route('/addrec/<termid>/')
 def addrec():
     if request.method == 'POST':
         try:
@@ -44,8 +55,10 @@ def addrec():
                 cur = con.cursor()
                 cur.execute("select max(id) from defined")
                 row = cur.fetchone()
-                next_id = int(row[0])+1
-                cur.execute("INSERT INTO defined (id, term,part_of_speech,definition, quizzed, correct, date_added) VALUES (?,?,?,?,0,0,datetime(\"now\"))", (next_id,term, pos, defin))
+                next_id = int(row[0]) + 1
+                cur.execute(
+                    "INSERT INTO defined (id, term,part_of_speech,definition, quizzed, correct, date_added) VALUES (?,?,?,?,0,0,datetime(\"now\"))",
+                    (next_id, term, pos, defin))
                 con.commit()
                 msg = "Record successfully added to definition list."
                 con.commit()
@@ -57,35 +70,6 @@ def addrec():
         finally:
             return render_template("result.html", msg=msg)
             con.close()
-
-
-
-# @app.route('/quizproc', methods=['POST', 'GET'])
-# def quizproc():
-#     if request.method == 'POST':
-#         try:
-#             term = request.form['term']
-#             pos = request.form['pos']
-#             ans = request.form['ans']
-#
-#             with sql.connect("vocab.db") as con:
-#                 cur = con.cursor()
-#                 cur.execute("Update defined set quizzed = quizzed +1 WHERE term = ? and part_of_speech = ?",
-#                             (term, pos))
-#                 con.commit()
-#                 if ans == 'c':
-#                     msg = "Correct!"
-#                     cur.execute("Update defined set correct = correct+1 WHERE term = ? and part_of_speech = ?",
-#                                 (term, pos))
-#                 else:
-#                     msg = "Sorry, that is not correct"
-#                 con.commit()
-#         except:
-#             con.rollback()
-#             msg = "error in update operation"
-#         finally:
-#             con.close()
-#             return msg
 
 
 @app.route('/reporting')
@@ -100,33 +84,25 @@ def reporting():
     cur.execute(
         'select term, sum(correct) as cor, count(correct) as tot, sum(correct)*1.0/count(correct)*1.0 as pct from quizquestion group by term having pct < 1.0 order by pct, tot desc')
     rows = cur.fetchall();
-    return render_template("reporting.html", oall=oall, rows=rows)
     con.close()
+    return render_template("reporting.html", oall=oall, rows=rows)
 
 
 @app.route('/editrec', methods=['POST', 'GET'])
 def editrec():
-    if request.method == 'POST':
-        try:
-            term = request.form['term']
-            pos = request.form['pos']
-            defin = request.form['defin']
+    msg = "1=1"
+    termid = request.form['termid']
+    term = request.form['term']
+    pos = request.form['pos']
+    defin = request.form['defin']
+    con = sql.connect("vocab.db")
+    cur = con.cursor()
+    cur.execute("Update defined set definition = ?, term = ?, part_of_speech = ? WHERE id = ?", (defin, term, pos, termid))
+    con.commit()
+    msg = "Definition successfully updated"
+    return render_template("result.html", msg=msg)
+    con.close()
 
-            with sql.connect("vocab.db") as con:
-                cur = con.cursor()
-                cur.execute("Update defined set definition = ? WHERE term = ? and part_of_speech = ?",
-                            (defin, term, pos))
-
-                con.commit()
-                msg = "Definition successfully updated"
-
-        except:
-            con.rollback()
-            msg = "error in update operation"
-
-        finally:
-            return render_template("result.html", msg=msg)
-            con.close()
 
 
 @app.route('/defined')
@@ -193,11 +169,11 @@ def edit(term, pos):
         return deflist()
 
 
-@app.route('/quiz', defaults={'nq': 10},  methods=['POST', 'GET'])
-@app.route('/quiz/<nq>/',  methods=['POST', 'GET'])
+@app.route('/quiz', defaults={'nq': 10}, methods=['POST', 'GET'])
+@app.route('/quiz/<nq>/', methods=['POST', 'GET'])
 def quiz(nq):
     if request.method == 'GET':
-        nq=int(nq)
+        nq = int(nq)
         con = sql.connect("vocab.db")
         cur = con.cursor()
         cur.execute("insert into quiz(q_num) values (?)", [nq])
@@ -209,30 +185,32 @@ def quiz(nq):
             con = sql.connect("vocab.db")
             con.row_factory = sql.Row
             cur = con.cursor()
-            
+
             # favor words that have not yet been quizzed by a certain percentage
-            new_favor_factor = 90
-            if random.randint(1,100)< new_favor_factor:
-                x = "select * from defined where term in (select term from defined except select distinct term from quizquestion) order by random() limit 1"
+            new_favor_factor = 101
+            if random.randint(1, 100) < new_favor_factor:
+                ## get all term ids that are not in quizquestions
+                x = "select * from defined where id  not in (select term_id from quizquestion) order by random() limit 1"
             else:
                 got_wrong_factor = 90
-                if random.randint(1,100) < got_wrong_factor:
-                    x = "select * from defined where term in (select distinct term from quizquestion) order by random() limit 1"
+                if random.randint(1, 100) > got_wrong_factor:
+                    x = "select * from defined where id in (select distinct term_id from quizquestion) order by random() limit 1"
                 else:
-                    x = "select * from defined where term in (select term from quizquestion group by term having sum(correct)/count(correct)< 1) order by random() limit 1"
-
+                    x = "select * from defined where id in (select term_id from quizquestion group by term_id having sum(correct)/count(correct)< 1) order by random() limit 1"
             cur.execute(x)
             row = cur.fetchone()
+            termid = str(row["id"])
             term = str(row["term"])
             pos = str(row["part_of_speech"])
             correct = (str(row["definition"]).capitalize())
+            #print(termid, term, pos, correct)
 
             ## Get distractors
-            cur.execute("select definition from defined where term!= ? and part_of_speech = ? order by random() limit 3",
-                        (term, pos))
+            cur.execute(
+                "select definition, id from defined where id != ? and part_of_speech = ? order by random() limit 3",
+                (termid, pos))
             rows = cur.fetchall()
             options = {correct: 1}
-            print(term)
             for i in range(0, 3):
                 options[str(rows[i][0])] = 0
 
@@ -245,16 +223,50 @@ def quiz(nq):
             x[1].insert(0, 'B')
             x[2].insert(0, 'C')
             x[3].insert(0, 'D')
-            quizd[term] = x
-        
-        return render_template("quiz.html", quizd = quizd)
+            x.append(termid)
+            quizd[(term)] = x
+        #print(quizd)
+        return render_template("quiz.html", quizd=quizd, quiz_id=quiz_id)
     else:
-##        return(request.form)
-        print(request.form, file=sys.stderr)
-        return("girlhomo")
+        print(request.form)
+        quiz_id = request.form['quiz_id']
+        con = sql.connect("vocab.db")
+        con.row_factory = sql.Row
+        cur = con.cursor()
+        for x in request.form:
+            if x != 'quiz_id':
+                if request.form[x] == 'NULL':
+                    cur.execute("insert into quizquestion(quiz_id, term_id, correct) values(?,?,1)", (quiz_id, x))
+                    con.commit()
+                else:
+                    cur.execute("insert into quizquestion(quiz_id, term_id, correct, guess) values(?,?,0,?)", (quiz_id, x, request.form[x]))
+                    con.commit()
+        cur.execute("select defined.id, term from defined, quizquestion where defined.id = quizquestion.term_id and quiz_id = ? and quizquestion.correct = 1 order by term", (quiz_id,))
+        rows_r = cur.fetchall()
+        cur.execute("select defined.id, term, defined.definition, guess from defined, quizquestion where defined.id = quizquestion.term_id and quiz_id = ? and quizquestion.correct = 0 order by term", (quiz_id,))
+        rows_w = cur.fetchall()
+        return render_template("quiz_results.html", rows_r = rows_r, rows_w = rows_w, quiz_id = quiz_id)
+
+
+@app.route('/del_udef', methods=['POST', 'GET'])
 @app.route('/del_udef', methods=['POST', 'GET'])
 def delete_udef():
-    return ("OK DOKEY SMKOEY!")
+    term = request.args.get("term")
+    con = sql.connect("vocab.db")
+    cur = con.cursor()
+    cur.execute("delete from undefined where term = ?", (term,))
+    con.commit()
+    return render_template("home.html", msg="OK DOKEY SMKOEY!")
+
+
+@app.route('/del_def', methods=['POST', 'GET'])
+def delete_term():
+    termid = request.args.get("termid")
+    con = sql.connect("vocab.db")
+    cur = con.cursor()
+    cur.execute("delete from defined where id = ?", (termid,))
+    con.commit()
+    return render_template("home.html", msg = "OK DOKEY SMKOEY!")
 
 
 if __name__ == '__main__':
