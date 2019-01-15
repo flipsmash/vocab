@@ -1,12 +1,20 @@
-<head>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2>{% block title %}The Quiz App{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
 <a href="{{ url_for('new_term')}}">Add a new record</a><br>
 <a href="{{ url_for('deflist')}}">View all defined terms</a><br>
 <a href="{{ url_for('udeflist')}}">View undefined terms</a><br>
 <a href="{{ url_for('flashcard')}}">Flashcards</a><br>
-<a href="{{ url_for('quiz')}}">Take a Quiz</a><br>
+<a href="{{ url_for('quiz')}}">Take a Quiz</a> <a href="{{ url_for('quiz')}}/5/">5</a> | <a href="{{ url_for('quiz')}}/10/">10</a> | <a href="{{ url_for('quiz')}}/20/">20</a> | <a href="{{ url_for('quiz')}}/50/">50</a><br>
 <a href="{{ url_for('edit')}}">Edit a definition</a><br>
 <a href="{{ url_for('reporting')}}">Reporting</a><br>
 <a href="/">Admin</a><br>
 <a href="{{ url_for('edit')}}">Upload a wordlist</a>
+{% endblock %}
+
+
+

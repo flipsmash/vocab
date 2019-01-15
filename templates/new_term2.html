@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2>{% block title %}Enter New Term{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
+   <form action = "{{ url_for('addrec') }}" method = "POST">
+         Term: </nbsp>
+         <input type = "text" name = "term" value="" /></br>
+
+         Definition<br>
+         <textarea name = "defin" rows="4" cols="100" ></textarea>
+
+         <br>Past of Speech<br>
+         <select name="pos">
+		  <option value="Adjective"%}>Adjective</option>
+		  <option value="Adverb">Adverb</option>
+		  <option value="Noun">Noun</option>
+		  <option value="Verb"{>Verb</option>
+		 </select><br><br>
+         <input type = "Submit" value = "submit" /><br>
+      </form>
+{% endblock %}

@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect
+from flask_table import Table, Col
 import time
 import sys
 import sqlite3 as sql
@@ -77,14 +78,29 @@ def reporting():
     con = sql.connect("vocab.db")
     con.row_factory = sql.Row
     cur = con.cursor()
-    cur.execute("select round(sum(correct)*100.0/sum(quizzed)*1.0,1), cast(sum(quizzed) as integer) from defined")
+    cur.execute("select round(sum(correct)*100.0/count(correct)*1.0,1), count(correct) from quizquestion")
     row = cur.fetchone();
     oall = str(row[0]) + "% correct on " + str(row[1]) + " questions."
 
     cur.execute(
-        'select term, sum(correct) as cor, count(correct) as tot, sum(correct)*1.0/count(correct)*1.0 as pct from quizquestion group by term having pct < 1.0 order by pct, tot desc')
+        'select term, sum(correct) as cor, count(correct) as tot, sum(correct)*1.0/count(correct)*1.0 as pct from quizquestion, defined where term_id = id group by term having pct < 1.0 order by pct, tot desc')
     rows = cur.fetchall();
     con.close()
+
+    # class ItemTable(Table):
+    #     name = Col('Name')
+    #     description = Col('Description')
+    #     description2 = Col('Your Guess')
+    #
+    # class Item(object):
+    #     def __init__(self, name, description, description2):
+    #         self.name = name
+    #         self.description = description
+    #         self.description2 = description2
+    #
+    # items = rows
+    # table = ItemTable(items)
+    # print(table.__html__())
     return render_template("reporting.html", oall=oall, rows=rows)
 
 
@@ -187,7 +203,7 @@ def quiz(nq):
             cur = con.cursor()
 
             # favor words that have not yet been quizzed by a certain percentage
-            new_favor_factor = 101
+            new_favor_factor = 90
             if random.randint(1, 100) < new_favor_factor:
                 ## get all term ids that are not in quizquestions
                 x = "select * from defined where id  not in (select term_id from quizquestion) order by random() limit 1"
@@ -228,7 +244,7 @@ def quiz(nq):
         #print(quizd)
         return render_template("quiz.html", quizd=quizd, quiz_id=quiz_id)
     else:
-        print(request.form)
+        #print(request.form)
         quiz_id = request.form['quiz_id']
         con = sql.connect("vocab.db")
         con.row_factory = sql.Row
@@ -243,9 +259,12 @@ def quiz(nq):
                     con.commit()
         cur.execute("select defined.id, term from defined, quizquestion where defined.id = quizquestion.term_id and quiz_id = ? and quizquestion.correct = 1 order by term", (quiz_id,))
         rows_r = cur.fetchall()
+        nr = len(rows_r)
         cur.execute("select defined.id, term, defined.definition, guess from defined, quizquestion where defined.id = quizquestion.term_id and quiz_id = ? and quizquestion.correct = 0 order by term", (quiz_id,))
         rows_w = cur.fetchall()
-        return render_template("quiz_results.html", rows_r = rows_r, rows_w = rows_w, quiz_id = quiz_id)
+        nw = len(rows_w)
+        pct_r = round(nr*100/(nr + nw))
+        return render_template("quiz_results.html", rows_r = rows_r, rows_w = rows_w, quiz_id = quiz_id, pct_r = pct_r)
 
 
 @app.route('/del_udef', methods=['POST', 'GET'])

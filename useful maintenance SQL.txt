@@ -1,0 +1,1 @@
+update defined set definition = substr(definition, 3,length(definition)-4) where substr(definition,1,2) = "['"

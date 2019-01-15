@@ -1,0 +1,25 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+   <body>
+      
+      <form action = "{{ url_for('editrec') }}" method = "POST">
+         <h3>Edit a Definition for Term {{termid}}:</h3>
+         <input type = "text" name = "term" value="{{ term }}" /></br></br>
+
+         Definition<br>
+         <textarea name = "defin" rows="4" cols="100" ></textarea><br>
+
+         <br>Past of Speech<br>
+         <select name="pos">
+		  <option value="Adjective">Adjective</option>
+		  <option value="Adverb">Adverb</option>
+		  <option value="Noun">Noun</option>
+		  <option value="Verb">Verb</option>
+		 </select><br><br>
+         <input type = "submit" value = "submit" /><br>
+      </form>
+      
+   </body>
+</html>

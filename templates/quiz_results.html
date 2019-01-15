@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2>{% block title %}Quiz Results{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
+<p>You got {{pct_r}}% of the words correct.</p>
+<strong>Right:</strong><br>
+	{% for row in rows_r %}
+		{{ row[1] }},
+	{% else %}
+		None<br>
+	{% endfor %}
+<p><strong>Wrong:</strong></p>
+
+<table id="basictable">
+         <thead>
+            <td>Term</td>
+            <td>Actual Definition</td>
+            <td>You Guessed</td>
+         </thead>
+
+         {% for row2 in rows_w %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+               <td>{{row2[1]}}</td>
+               <td>{{row2[2]}}</td>
+               <td>{{row2[3]}}</td>
+            </tr>
+		{% else %}
+			None<br>
+		{% endfor %}
+{% endblock %}

@@ -1,7 +1,8 @@
 from PyDictionary import PyDictionary
 import json
 import sqlite3
-conn = sqlite3.connect('vocab.db')
+con = sqlite3.connect('vocab.db')
+cur = con.cursor()
 dictionary=PyDictionary()
 term_list = open('vocab.txt', 'r').read().splitlines()
 
@@ -19,7 +20,11 @@ for s in term_list:
             key = str(key)
             definit = str(definition[key])
             vals = (word, key, definit)
-            conn.execute("INSERT INTO defined (term, part_of_speech, definition) VAlUES (?,?,?)", vals)
+            cur.execute("select max(id) from defined")
+            row = cur.fetchone()
+            next_id = int(row[0])+1
+            cur.execute("INSERT INTO defined (id, term, part_of_speech, definition) VAlUES (?,?,?,?)", (next_id, word, key, definit))
+            cur.execute("delete from undefined where term = ?", (word))
     except:
           undefs.append(word)
           
@@ -27,9 +32,9 @@ for s in term_list:
 for t in undefs:
     t = str(t.upper())
     try:
-        conn.execute("INSERT INTO undefined VALUES(?)", (t,))
-    except conn.IntegrityError:
+        con.execute("INSERT INTO undefined VALUES(?)", (t,))
+    except con.IntegrityError:
         print("Term already present in the undefined table")
-conn.commit()
-conn.close()
+con.commit()
+con.close()
 print (undefs)
