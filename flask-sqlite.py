@@ -1,9 +1,12 @@
 from flask import Flask, render_template, request, redirect
 from flask_table import Table, Col
+from PyDictionary import PyDictionary
+import json
 import time
 import sys
 import sqlite3 as sql
 import random
+from mw_get_def import ProcessWords
 
 app = Flask(__name__)
 
@@ -13,9 +16,53 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/enternew')
+@app.route('/enternew', methods=['POST','GET'])
 def new_term():
-    return render_template('new_term2.html')
+    if request.method == 'POST':
+        if request.form['type']=="a":
+            if request.form['term']=="":
+                msg = "** Please enter a term to be defined, jackass. **"
+            elif request.form['defin']=="":
+                term = request.form['term']
+                term_list = []
+                term_list.append(term)
+                ProcessWords(term_list)
+                msg="Term Added."
+            else:
+                term = request.form['term']
+                pos = request.form['pos']
+                defin = request.form['defin']
+                if defin:
+                    con = sql.connect("vocab.db")
+                    cur = con.cursor()
+                    cur.execute("select max(id) from defined")
+                    row = cur.fetchone()
+                    next_id = int(row[0]) + 1
+                    cur.execute("INSERT INTO defined (id, term,part_of_speech,definition, quizzed, correct2, date_added) VALUES (?,?,?,?,0,0,datetime(\"now\"))",
+                            (next_id, term, pos, defin))
+                    con.commit()
+                    msg = "** Record for "+term+" as a " + pos + " successfully added to definition list. **"
+                    con.close()
+            return render_template('new_term2.html', msg=msg)
+        elif request.form['type']=="b":
+            dictionary=PyDictionary()
+            undefs = []
+            con = sql.connect('vocab.db')
+            cur = con.cursor()
+            term_list = request.form['term_list'].splitlines()
+            ProcessWords(term_list)
+            msg = "Second submit (B) returned"
+            return render_template('new_term2.html', msg=msg)
+        else:
+            term_file = request.form["term_file"]
+            msg = "Third submit (C) returned.  File was "+term_file
+            word_list = open(term_file, 'r').read().splitlines()
+            ProcessWords(word_list)
+            return render_template('new_term2.html', msg=msg)
+    else:
+        return render_template('new_term2.html')
+
+        
 
 
 @app.route('/editterm/<termid>/')
@@ -86,21 +133,6 @@ def reporting():
         'select term, sum(correct) as cor, count(correct) as tot, sum(correct)*1.0/count(correct)*1.0 as pct from quizquestion, defined where term_id = id group by term having pct < 1.0 order by pct, tot desc')
     rows = cur.fetchall();
     con.close()
-
-    # class ItemTable(Table):
-    #     name = Col('Name')
-    #     description = Col('Description')
-    #     description2 = Col('Your Guess')
-    #
-    # class Item(object):
-    #     def __init__(self, name, description, description2):
-    #         self.name = name
-    #         self.description = description
-    #         self.description2 = description2
-    #
-    # items = rows
-    # table = ItemTable(items)
-    # print(table.__html__())
     return render_template("reporting.html", oall=oall, rows=rows)
 
 
@@ -119,9 +151,7 @@ def editrec():
     return render_template("result.html", msg=msg)
     con.close()
 
-
-
-@app.route('/defined')
+@app.route('/defined', methods=['POST','GET'])
 @app.route('/defined/<alpha>')
 def deflist(alpha=None):
     con = sql.connect("vocab.db")
@@ -129,7 +159,13 @@ def deflist(alpha=None):
     cur = con.cursor()
 
     if (alpha is None):
-        cur.execute("select * from defined order by term")
+        if request.method == 'POST':
+            srch_term = request.form['srch_term']
+            qry = "select * from defined where term like('%"
+            qry = qry + srch_term + "%') order by term"
+            cur.execute(qry)
+        else:
+            cur.execute("select * from defined order by term")
     else:
         alpha = alpha + "%"
         qry = "select * from defined where term like('"
@@ -139,7 +175,6 @@ def deflist(alpha=None):
     rows = cur.fetchall()
     num_words = len(rows)
     return render_template("list.html", rows=rows, num_words=num_words)
-
 
 @app.route('/undefined')
 def udeflist():
@@ -203,12 +238,16 @@ def quiz(nq):
             cur = con.cursor()
 
             # favor words that have not yet been quizzed by a certain percentage
-            new_favor_factor = 90
+            new_favor_factor = cur.execute("select favor_new from config")
+            new_favor_factor = new_favor_factor.fetchone()[0]
+
             if random.randint(1, 100) < new_favor_factor:
                 ## get all term ids that are not in quizquestions
-                x = "select * from defined where id  not in (select term_id from quizquestion) order by random() limit 1"
+                x = "select * from defined where id  not in (select distinct term_id from quizquestion) order by random() limit 1"
             else:
-                got_wrong_factor = 90
+                got_wrong_factor = cur.execute("select favor_wrong from config")
+                got_wrong_factor = got_wrong_factor.fetchone()[0]
+
                 if random.randint(1, 100) > got_wrong_factor:
                     x = "select * from defined where id in (select distinct term_id from quizquestion) order by random() limit 1"
                 else:
@@ -275,8 +314,7 @@ def delete_udef():
     cur = con.cursor()
     cur.execute("delete from undefined where term = ?", (term,))
     con.commit()
-    return render_template("home.html", msg="OK DOKEY SMKOEY!")
-
+    return udeflist()
 
 @app.route('/del_def', methods=['POST', 'GET'])
 def delete_term():
@@ -285,8 +323,9 @@ def delete_term():
     cur = con.cursor()
     cur.execute("delete from defined where id = ?", (termid,))
     con.commit()
-    return render_template("home.html", msg = "OK DOKEY SMKOEY!")
-
+    return deflist()
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

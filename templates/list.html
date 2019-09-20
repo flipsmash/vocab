@@ -5,6 +5,10 @@
 {% endblock %}
 
 {% block content %}
+<form action = "{{ url_for('deflist') }}" method = "POST">
+         Find a Defined Term:<input type = "text" name = "srch_term"  value="{{ srch_term }}" size = "15"><input type = "submit" value = "submit" /><br>
+      </form>	  
+
    <p> <a href = "/defined/a">A</a> | <a href = "/defined/b">B</a> | <a href = "/defined/c">C</a> | <a href = "/defined/d">D</a> | <a href = "/defined/e">E</a> | <a href = "/defined/f">F</a> | <a href = "/defined/g">G</a> | <a href = "/defined/h">H</a> | <a href = "/defined/i">I</a> | <a href = "/defined/j">J</a> | <a href = "/defined/k">K</a> | <a href = "/defined/l">L</a> | <a href = "/defined/m">M</a> | <a href = "/defined/n">N</a> | <a href = "/defined/o">O</a> | <a href = "/defined/p">P</a> | <a href = "/defined/q">Q</a> | <a href = "/defined/r">R</a> | <a href = "/defined/s">S</a> | <a href = "/defined/t">T</a> | <a href = "/defined/u">U</a> | <a href = "/defined/v">V</a> | <a href = "/defined/w">W</a> | <a href = "/defined/x">X</a> | <a href = "/defined/y">Y</a> | <a href = "/defined/z">Z</a></p>
    <p>{{ num_words }} Terms Defined</p>
       <table id="basictable">
@@ -12,6 +16,8 @@
             <td>Term</td>
             <td>Part of Speech</td>
             <td>Definition</td>
+			<td>Frequency</td>
+			<td>Pronounce</td>
 
          </thead>
 
@@ -20,6 +26,13 @@
                <td>{{row["term"]}}<br><a href="{{ url_for('edit_term', termid = row["id"]) }}"><div class="sm">[edit]</a>  |  <a href="{{ url_for('delete_term', termid = row["id"]) }}" onclick="return confirm('Are you sure you want to delete this item?');">[delete]</div></a></td>
                <td>{{row["part_of_speech"]}}</td>
                <td> {{ row["definition"]}}</td>
+			   <td> {{ row["frequency"]}}</td>
+			   <td> {{ row["wav_url"]}}</td>
+			   <td> 
+			   {% if row["wav_url"] != "None" %}
+			   <a href = " {{ row["wav_url"] }}" target = "_blank"><img src="../static/speaker.jpg" alt="speaker"></a>
+			   {% endif %}
+			   </td>
             </tr>
          {% endfor %}
       </table>

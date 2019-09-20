@@ -1,24 +1,39 @@
 {% extends 'base.html' %}
 
-{% block header %}
-  <h2>{% block title %}Enter New Term{% endblock %}</h2>
-{% endblock %}
-
 {% block content %}
-   <form action = "{{ url_for('addrec') }}" method = "POST">
-         Term: </nbsp>
-         <input type = "text" name = "term" value="" /></br>
+  <h2>{% block title %}Enter & Define a New Term{% endblock %}</h2>
+  {{ msg }}
+   <form action = "{{ url_for('new_term') }}" method = "POST">
+         Term:<input type = "text" name = "term" value="">
 
          Definition<br>
          <textarea name = "defin" rows="4" cols="100" ></textarea>
-
-         <br>Past of Speech<br>
+         Part of Speech<br>
          <select name="pos">
-		  <option value="Adjective"%}>Adjective</option>
+		  <option value="Adjective"}>Adjective</option>
 		  <option value="Adverb">Adverb</option>
 		  <option value="Noun">Noun</option>
-		  <option value="Verb"{>Verb</option>
-		 </select><br><br>
-         <input type = "Submit" value = "submit" /><br>
+		  <option value="Verb">Verb</option>
+		 </select>
+		 <input type="hidden" name="type" value="a">
+         <br><input type = "Submit" value = "submit" />
       </form>
+	  <hr>
+<h2>Paste a List of Terms</h2>
+	  <form action = "{{ url_for('new_term') }}" method = "POST">
+         Term list (1 per line):<br>
+         <textarea name = "term_list" rows="10" cols="50" ></textarea>
+         <br>
+		 <input type="hidden" name="type" value="b">
+		 <input type = "Submit" value = "submit" />
+      </form>
+<hr>	  
+<h2>Upload a Term List</h2>
+	  <form action = "{{ url_for('new_term') }}" method = "POST">
+         File containing terms (1 per line, text only):<br><br>
+         <input type="file" name="term_file" id="term_file">
+		 <input type="hidden" name="type" value="c">
+         <br><input type = "Submit" value = "submit" />
+      </form>
+	  
 {% endblock %}
